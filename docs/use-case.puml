@@ -1,0 +1,80 @@
+@startuml "Use Case Diagram для системы управления задачами"
+' Автор: Заозерская Екатерина
+' Версия: 2.0 (стиль Kilo Code)
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor White
+  BorderColor Black
+}
+
+actor "Пользователь" as User <<основной>>
+actor "Администратор" as Admin <<расширенный>>
+actor "Система" as System <<автоматическая>> #LightGray
+
+package "Микросервис пользователей (user_service)" #LightBlue {
+  usecase "Зарегистрироваться" as UC1
+  usecase "Войти в систему" as UC2
+  usecase "Управление пользователями" as UC9 #Orange
+  usecase "Просмотр статистики" as UC10 #Orange
+  usecase "Сброс пароля" as UC11 #LightGreen
+}
+
+package "Микросервис задач (task_service)" #LightYellow {
+  usecase "Создать задачу" as UC3
+  usecase "Просмотреть все задачи" as UC4
+  usecase "Изменить статус задачи" as UC5
+  usecase "Назначить исполнителя" as UC6
+  usecase "Удалить задачу" as UC7
+  usecase "Просмотреть детали задачи" as UC8
+  usecase "Добавить комментарий" as UC12 #LightCyan
+  usecase "Прикрепить файл" as UC13 #LightCyan
+}
+
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+User --> UC5
+User --> UC6
+User --> UC7
+User --> UC8
+User --> UC12
+User --> UC13
+
+Admin --> UC1
+Admin --> UC2
+Admin --> UC9
+Admin --> UC10
+
+UC6 ..> "user_service" : <<HTTP>> проверка существования пользователя
+
+UC5 ..> UC6 : <<extend>>
+UC11 ..> UC2 : <<include>>
+
+legend bottom right
+  | <back:orange>    </back> | Функции для масштабирования (pet-project) |
+  | <back:LightGreen> </back> | Функции безопасности |
+  | <back:LightCyan>  </back> | Дополнительные функции (комментарии/файлы) |
+  | <back:white>      </back> | Основные функции системы |
+  | <back:LightBlue>  </back> | Граница микросервиса user_service |
+  | <back:LightYellow></back> | Граница микросервиса task_service |
+  | <back:LightGray>  </back> | Автоматические действия системы |
+endlegend
+
+note right of UC6
+  **Важно:** Назначение исполнителя
+  требует HTTP-запроса к user_service
+  для проверки существования пользователя
+end note
+
+note bottom of System
+  **Система автоматически:**
+  - Проверяет права доступа
+  - Логирует все действия
+  - Отправляет уведомления
+end note
+
+@enduml

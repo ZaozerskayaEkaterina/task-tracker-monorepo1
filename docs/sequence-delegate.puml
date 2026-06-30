@@ -1,0 +1,46 @@
+@startuml "Sequence Diagram для делегирования задачи"
+' Автор: Заозерская Екатерина
+' Версия: 2.1 (стиль Kilo Code)
+
+title "Делегирование задачи (назначение исполнителя)"
+
+actor "Клиент" as Client
+participant "API Gateway" as Gateway
+participant "Task Service" as TaskService
+participant "User Service" as UserService
+database "Task DB" as TaskDB
+database "User DB" as UserDB
+
+Client -> Gateway: POST /tasks/{task_id}/delegate?assigneeId=X
+Gateway -> TaskService: POST /tasks/{task_id}/delegate?assigneeId=X
+TaskService -> TaskDB: SELECT * FROM tasks WHERE id = {task_id}
+TaskDB --> TaskService: task_data
+
+alt Задача не найдена
+    TaskService --> Gateway: 404 Not Found (Задача не найдена)
+    Gateway --> Client: 404 Not Found
+else Задача найдена
+    TaskService -> UserService: HTTP GET /users/{assigneeId}
+    UserService -> UserDB: SELECT * FROM users WHERE id = {assigneeId}
+    UserDB --> UserService: user_data / empty
+
+    alt Пользователь не найден
+        UserService --> TaskService: 404 Not Found
+        TaskService --> Gateway: 404 Not Found (Исполнитель не найден)
+        Gateway --> Client: 404 Not Found
+    else Некорректный ID
+        TaskService --> Gateway: 400 Bad Request
+        Gateway --> Client: 400 Bad Request
+    else Внутренняя ошибка
+        TaskService --> Gateway: 500 Internal Server Error
+        Gateway --> Client: 500 Internal Server Error
+    else Успех
+        UserService --> TaskService: 200 OK (user_data)
+        TaskService -> TaskDB: UPDATE tasks SET assignee_id = {assigneeId}
+        TaskDB --> TaskService: OK
+        TaskService --> Gateway: 200 OK (Задача обновлена)
+        Gateway --> Client: 200 OK
+    end
+end
+
+@enduml
