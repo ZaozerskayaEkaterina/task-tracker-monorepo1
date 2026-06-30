@@ -1,0 +1,88 @@
+@startuml "ER-диаграмма для микросервисов"
+' Автор: Заозерская Екатерина
+' Версия: 2.0 (без ===)
+
+skinparam entity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam package {
+  BackgroundColor #F0F8FF
+  BorderColor Black
+}
+
+title "Схемы баз данных микросервисов (изолированные)"
+
+legend left
+  | <back:LightBlue>    </back> | user_service (база пользователей) |
+  | <back:LightYellow>  </back> | task_service (база задач) |
+  | <back:#FFE4E1>      </back> | Логическая связь через HTTP |
+endlegend
+
+package "user_service (база пользователей)" #LightBlue {
+  entity "users" as users {
+    * id : BIGINT <<PK>> (автоинкремент)
+    --
+    * first_name : VARCHAR(100) <<NOT NULL>>
+    * last_name : VARCHAR(100) <<NOT NULL>>
+    * email : VARCHAR(255) <<UNIQUE, NOT NULL>>
+    * password_hash : VARCHAR(255) <<NOT NULL>>
+    * role : VARCHAR(50) <<DEFAULT 'USER'>>
+    * created_at : TIMESTAMP <<DEFAULT CURRENT_TIMESTAMP>>
+    * updated_at : TIMESTAMP <<DEFAULT CURRENT_TIMESTAMP>>
+  }
+
+  note bottom of users
+    **Индексы:**
+    - PRIMARY KEY (id)
+    - UNIQUE (email)
+    - INDEX (role)
+  end note
+}
+
+package "task_service (база задач)" #LightYellow {
+  entity "tasks" as tasks {
+    * id : BIGINT <<PK>> (автоинкремент)
+    --
+    * title : VARCHAR(255) <<NOT NULL>>
+    description : TEXT
+    * status : VARCHAR(50) <<DEFAULT 'TODO'>>
+    * creator_id : BIGINT <<NOT NULL>>
+    assignee_id : BIGINT <<NULL>>
+    * created_at : TIMESTAMP <<DEFAULT CURRENT_TIMESTAMP>>
+    * updated_at : TIMESTAMP <<DEFAULT CURRENT_TIMESTAMP>>
+    deadline : DATE
+  }
+
+  note bottom of tasks
+    **Ограничения (CHECK):**
+    status IN ('TODO', 'IN_PROGRESS', 'DONE')
+
+    **Индексы:**
+    - PRIMARY KEY (id)
+    - INDEX (creator_id)
+    - INDEX (assignee_id)
+    - INDEX (status)
+  end note
+}
+
+users ||--o{ tasks : "creator_id (логическая связь через HTTP)"
+users ||--o{ tasks : "assignee_id (логическая связь через HTTP)"
+
+note bottom of users
+  <b>ВАЖНО:</b>
+  - Базы ИЗОЛИРОВАНЫ
+  - Нет внешних ключей между БД
+  - Связи реализуются через HTTP-запросы
+  - user_service и task_service НЕ имеют общего доступа к БД
+end note
+
+note bottom of tasks
+  <b>Логика связей:</b>
+  - creator_id → users.id (создатель)
+  - assignee_id → users.id (исполнитель)
+  - Проверка существования пользователей 
+    происходит через HTTP-запросы
+end note
+
+@enduml
