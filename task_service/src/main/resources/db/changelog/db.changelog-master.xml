@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- файл миграций liquibase для таблицы задач -->
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- набор изменений с уникальным идентификатором и автором -->
+    <changeSet id="1" author="ekaterina">
+
+        <!-- создание таблицы tasks -->
+        <createTable tableName="tasks">
+
+            <!-- первичный ключ, автоинкремент -->
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <!-- название задачи, обязательно -->
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- статус, по умолчанию todo -->
+            <column name="status" type="VARCHAR(50)" defaultValue="TODO">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- id создателя, обязательно -->
+            <column name="creator_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- id исполнителя, необязательно -->
+            <column name="assignee_id" type="BIGINT"/>
+
+            <!-- дата создания -->
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+
+            <!-- дата обновления -->
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
