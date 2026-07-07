@@ -1,18 +1,21 @@
 package com.example.taskservice.service;
 
+import com.example.taskservice.client.UserServiceClient;
 import com.example.taskservice.entity.Task;
 import com.example.taskservice.repository.TaskRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
-// аннотация @service указывает спрингу, что этот класс содержит бизнес-логику
+// этот класс содержит бизнес-логику для работы с задачами
 @Service
 public class TaskService {
 
     // репозиторий для работы с базой данных
     private final TaskRepository taskRepository;
 
-    // конструктор для внедрения зависимости репозитория
+    // спринг внедрит репозиторий через конструктор
     public TaskService(TaskRepository taskRepository) {
         this.taskRepository = taskRepository;
     }
@@ -29,6 +32,23 @@ public class TaskService {
 
     // обновляет существующую задачу
     public Task updateTask(Task task) {
+        return taskRepository.save(task);
+    }
+
+    // назначает исполнителя на задачу
+    // проверяет, что задача существует и пользователь с assigneeId есть в user service
+    public Task delegateTask(Long taskId, Long assigneeId, UserServiceClient userServiceClient) {
+        // поиск задачи по id, если не найдена - исключение
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found with id: " + taskId));
+
+        // проверка существования пользователя через http-запрос
+        if (!userServiceClient.userExists(assigneeId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id: " + assigneeId);
+        }
+
+        // назначение исполнителя и сохранение
+        task.setAssigneeId(assigneeId);
         return taskRepository.save(task);
     }
 }

@@ -1,29 +1,29 @@
 # настройки сервера
 server:
-  port: 8082                     # таск сервис будет слушать порт 8082
+  port: 8082
 
 spring:
   application:
-    name: task-service           # имя приложения, используется при регистрации и для swagger
+    name: task-service
 
-  # настройки подключения к базе данных
+  # настройки подключения к базе данных h2
   datasource:
-    url: jdbc:h2:mem:taskdb      # h2 база в памяти, называется taskdb (отдельная от userdb)
+    url: jdbc:h2:mem:taskdb
     driver-class-name: org.h2.Driver
-    username: sa                 # стандартный юзер для h2
-    password:                    # пароль пустой
+    username: sa
+    password:
 
   # настройки jpa и hibernate
   jpa:
     hibernate:
-      ddl-auto: none             # отключаем автосоздание таблиц, используем ликвидбейз
-    show-sql: true               # выводить sql запросы в лог
+      ddl-auto: none             # создание таблиц через liquibase
+    show-sql: true
 
-  # h2 консоль для просмотра таблиц и данных
+  # h2 консоль для просмотра таблиц
   h2:
     console:
       enabled: true
 
-  # настройки миграций ликвидбейз
+  # настройки liquibase
   liquibase:
-    change-log: classpath:db/changelog/db.changelog-master.xml   # путь к файлу с изменениями
+    change-log: classpath:db/changelog/db.changelog-master.xml
