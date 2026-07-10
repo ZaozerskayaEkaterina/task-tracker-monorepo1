@@ -1,29 +1,20 @@
-# настройки сервера
 server:
   port: 8082
 
 spring:
   application:
     name: task-service
-
-  # настройки подключения к базе данных h2
   datasource:
-    url: jdbc:h2:mem:taskdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-
-  # настройки jpa и hibernate
+    url: jdbc:postgresql://postgres:5432/taskdb
+    driver-class-name: org.postgresql.Driver
+    username: ${POSTGRES_USER:user}
+    password: ${POSTGRES_PASSWORD:password}
   jpa:
     hibernate:
-      ddl-auto: none             # создание таблиц через liquibase
+      ddl-auto: none
     show-sql: true
-
-  # h2 консоль для просмотра таблиц
-  h2:
-    console:
-      enabled: true
-
-  # настройки liquibase
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
+
+user-service:
+  url: http://user-service:8081

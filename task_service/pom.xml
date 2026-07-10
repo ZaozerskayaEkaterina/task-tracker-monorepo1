@@ -44,7 +44,11 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
         <!-- liquibase для управления схемой базы данных -->
         <dependency>
             <groupId>org.liquibase</groupId>
