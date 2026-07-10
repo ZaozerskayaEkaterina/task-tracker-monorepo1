@@ -1,0 +1,15 @@
+name: Docker Build
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build with Docker Compose
+        run: docker compose up -d --build
+      - name: Check services
+        run: docker ps
