@@ -9,6 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 // этот класс содержит бизнес-логику для работы с задачами
+@SuppressWarnings("null")
 @Service
 public class TaskService {
 
